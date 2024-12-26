@@ -19,16 +19,13 @@
                             <a-button type="primary" @click="GetMysqlProcesslistFresh">刷新</a-button>
                             <a-button @click="Kill">杀死选中会话</a-button>
                         </a-flex>
-
-                        <a-table :columns="columns" :data-source="data" :row-selection="rowSelection"
-                            :scroll="{ x: 1500, y: 1000 }" bordered size="small">
+                        <a-table :columns="columns" :data-source="data" :row-selection="rowSelection" :scroll="{ x: 1500, y: 1000 }" bordered size="small">
                             <template #bodyCell="{ column, record }">
                                 <template v-if="record.children != null && column.key === 'id'">
                                     <a-tag color="pink">{{ Object.keys(record.children).length }}</a-tag>
                                 </template>
                             </template>
                         </a-table>
-
                         <a-flex gap="small">
                             <a-card title="按用户">
                                 <a-table :columns="columnsU" :data-source="dataU" bordered size="small"></a-table>
@@ -44,13 +41,11 @@
                     <a-tab-pane key="2" tab="锁分析">
                         <a-divider style="height: 2px; background-color: black" />
                         <div>
-                            <a-space wrap>
-                                <a-button type="primary">Primary Button</a-button>
-                                <a-button>Default Button</a-button>
-                                <a-button type="dashed">Dashed Button</a-button>
-                                <a-button type="text">Text Button</a-button>
-                                <a-button type="link">Link Button</a-button>
-                            </a-space>
+                            <a-flex gap="small">
+                            <a-button type="primary" @click="GetMysqlLocks">刷新</a-button>
+                            <a-button @click="LockKill">杀死选中会话</a-button>
+                        </a-flex>
+                            <a-table :columns="columnsL" :data-source="dataL" :row-selection="rowSelection" :scroll="{ x: 1500, y: 1000 }" bordered size="small"></a-table>
                         </div>
                     </a-tab-pane>
                 </a-tabs>
@@ -62,7 +57,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
-import { GetMysqlProcesslist, KillMysqlProcesses,GetConsStatus ,GetConspercent} from "../../wailsjs/go/main/App";
+import { GetMysqlProcesslist, KillMysqlProcesses,GetConsStatus ,GetConspercent,GetMysqlLock} from "../../wailsjs/go/main/App";
 import { message } from 'ant-design-vue';
 const total = ref("")
 const active = ref("")
@@ -71,6 +66,7 @@ const route = useRoute()
 const activeKey = ref('1');
 const processType = ref("alive");
 const data = ref([])
+const dataL = ref([])
 const selectedRowsToKill = ref([])
 dbId.value = route.params.id
 const columnsU = [
@@ -118,6 +114,55 @@ const columnD = [
 const dataU = ref([]);
 const dataI = ref([]);
 const dataD = ref([]);
+
+const columnsL = [
+    {
+        title: 'ID',
+        dataIndex: 'id',
+        key: 'id',
+        width: '70',
+        fixed: 'left',
+    },
+    {
+        title: '用户',
+        dataIndex: 'user',
+        key: 'user',
+    },
+    {
+        title: '主机',
+        dataIndex: 'host',
+        key: 'host',
+        ellipsis: true,
+    },
+    {
+        title: '数据库名',
+        dataIndex: 'dbname',
+        key: 'dbname',
+    },
+    {
+        title: '命令',
+        dataIndex: 'command',
+        key: 'command',
+    },
+    {
+        title: '执行时间',
+        dataIndex: 'time',
+        key: 'time',
+    },
+    {
+        title: '状态',
+        dataIndex: 'status',
+        key: 'status',
+        ellipsis: true,
+    },
+    {
+        title: 'sql',
+        dataIndex: 'sql',
+        key: 'sql',
+        width: '30%',
+        ellipsis: true,
+    }
+];
 
 const columns = [
     {
@@ -186,6 +231,13 @@ function GetMysqlProcesslistFresh() {
     GetMysqlProcesslist(dbId.value, processType.value).then(result => {
         console.log(result)
         data.value = result;
+    })
+}
+
+function GetMysqlLocks(){
+    GetMysqlLock(dbId.value).then(result => {
+        console.log(result)
+        dataL.value = result;
     })
 }
 

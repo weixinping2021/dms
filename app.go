@@ -896,3 +896,55 @@ func (a *App) GetConspercent(dbId string) map[string]string {
 	fmt.Println(status)
 	return status
 }
+
+func (a *App) GetMysqlLock(dbId string) []MysqlProcessF {
+	dataEncoded, _ := os.ReadFile("./cons/" + dbId)
+	m := new(Connection)
+	json.Unmarshal(dataEncoded, &m)
+
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/information_schema", m.User, m.Password, m.Host, m.Port) //替换为你自己的数据库信息
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//先获取阻塞的组合,然后根据组合去循环
+	rows, err := db.Query("select requesting_trx_id,blocking_trx_id  from information_schema.INNODB_LOCK_WAITS ")
+	defer rows.Close()
+	var processesFs []MysqlProcessF
+
+	if err == nil {
+		for rows.Next() {
+			fmt.Println("start process")
+			var requesting_trx_id int
+			var blocking_trx_id int
+			rows.Scan(&requesting_trx_id, &blocking_trx_id)
+			var requestingProcess MysqlProcess
+			var blockingProcess MysqlProcess
+
+			err := db.QueryRow("select p.ID, p.USER, p.HOST, ifnull(p.DB,'') as DB, p.COMMAND,p.TIME, t.trx_state, IFNULL(p.INFO, 'No Query') AS INFO FROM INFORMATION_SCHEMA.PROCESSLIST p, information_schema.INNODB_TRX t where p.id = t.trx_mysql_thread_id  and t.trx_id = ?", requesting_trx_id).Scan(&requestingProcess.ID, &requestingProcess.User, &requestingProcess.Host, &requestingProcess.Dbname, &requestingProcess.Command, &requestingProcess.Time, &requestingProcess.Status, &requestingProcess.Sql)
+
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			err = db.QueryRow("select p.ID, p.USER, p.HOST, ifnull(p.DB,'') as DB, p.COMMAND,p.TIME, t.trx_state, IFNULL(p.INFO, 'No Query') AS INFO FROM INFORMATION_SCHEMA.PROCESSLIST p, information_schema.INNODB_TRX t where p.id = t.trx_mysql_thread_id  and t.trx_id = ?", blocking_trx_id).Scan(&blockingProcess.ID, &blockingProcess.User, &blockingProcess.Host, &blockingProcess.Dbname, &blockingProcess.Command, &blockingProcess.Time, &blockingProcess.Status, &blockingProcess.Sql)
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Println(requestingProcess)
+			fmt.Println(blockingProcess)
+			var processF = MysqlProcessF{requestingProcess.ID, requestingProcess.User, requestingProcess.Host, requestingProcess.Dbname, requestingProcess.Command, requestingProcess.Time, requestingProcess.Status, requestingProcess.Sql, strconv.Itoa(requestingProcess.ID), []MysqlProcess{}}
+			processF.Key = strconv.Itoa(requestingProcess.ID)
+			requestingProcess.Key = strconv.Itoa(requestingProcess.ID) + "-" + strconv.Itoa(requestingProcess.ID)
+			blockingProcess.Key = strconv.Itoa(requestingProcess.ID) + "-" + strconv.Itoa(blockingProcess.ID)
+			processF.Children = append(processF.Children, requestingProcess, blockingProcess)
+			processesFs = append(processesFs, processF)
+
+		}
+	} else {
+		fmt.Println(err)
+	}
+
+	return processesFs
+}

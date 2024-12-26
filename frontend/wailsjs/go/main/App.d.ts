@@ -16,6 +16,8 @@ export function GetConspercent(arg1:string):Promise<{[key: string]: string}>;
 
 export function GetFullCons():Promise<Array<main.Connection>>;
 
+export function GetMysqlLock(arg1:string):Promise<Array<main.MysqlProcessF>>;
+
 export function GetMysqlProcesslist(arg1:string,arg2:string):Promise<Array<main.MysqlProcessF>>;
 
 export function GetPeople():Promise<Array<main.Person>>;

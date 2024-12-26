@@ -30,6 +30,10 @@ export function GetFullCons() {
   return window['go']['main']['App']['GetFullCons']();
 }
 
+export function GetMysqlLock(arg1) {
+  return window['go']['main']['App']['GetMysqlLock'](arg1);
+}
+
 export function GetMysqlProcesslist(arg1, arg2) {
   return window['go']['main']['App']['GetMysqlProcesslist'](arg1, arg2);
 }
