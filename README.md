@@ -1,20 +1,7 @@
-# README
+为了平时工作的方便写了个(用了wails框架)
+功能展示:
+![image](https://github.com/user-attachments/assets/5ec9afb4-0e5b-403a-b8e2-44d06f8f3741)
 
-## About
-
-This is the official Wails Vue template.
-
-You can configure the project by editing `wails.json`. More information about the project settings can be found
-here: https://wails.io/docs/reference/project-config
-
-## Live Development
-
-To run in live development mode, run `wails dev` in the project directory. This will run a Vite development
-server that will provide very fast hot reload of your frontend changes. If you want to develop in a browser
-and have access to your Go methods, there is also a dev server that runs on http://localhost:34115. Connect
-to this in your browser, and you can call your Go code from devtools.
-
-## Building
-
-To build a redistributable, production mode package, use `wails build`.
-# dms
+实现mysql的会话管理,这样不用每次都去show processlist,而且如果是同样的sql,还能折叠起来,更方便查看问题.还可以选中直接杀掉
+![image](https://github.com/user-attachments/assets/e079acd4-5e6f-48c6-8488-187b09c327da)
+这个是redis的功能模块.可以分析redis的rdb文件.更方便查看问题.而且分析完后分析结果还能根据分析的日期默认保存起来,可以和前几天的分析结果进行比较.
