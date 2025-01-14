@@ -3,6 +3,9 @@ package main
 import (
 	"embed"
 
+	"dms/backend/mysql"
+	"dms/backend/redis"
+
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
@@ -14,7 +17,8 @@ var assets embed.FS
 func main() {
 	// Create an instance of the app structure
 	app := NewApp()
-
+	mysql := mysql.NewMysql()
+	redis := redis.NewRedis()
 	// Create application with options
 	err := wails.Run(&options.App{
 		Title:  "dms",
@@ -27,6 +31,8 @@ func main() {
 		OnStartup:        app.startup,
 		Bind: []interface{}{
 			app,
+			mysql,
+			redis,
 		},
 	})
 

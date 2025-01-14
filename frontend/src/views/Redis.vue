@@ -58,7 +58,8 @@ import { TitleComponent, TooltipComponent, LegendComponent } from 'echarts/compo
 import VChart, { THEME_KEY } from 'vue-echarts';
 import { ref, provide } from 'vue';
 import { FileAddOutlined } from '@ant-design/icons-vue';
-import { GetRedisMemory, OpenDialog, GetRedisKeys, AnalyseRdb,GetRedisTop500Prefix,GetPrefixkeys,GetRdbResultTitle } from "../../wailsjs/go/main/App";
+import { OpenDialog} from "../../wailsjs/go/main/App";
+import { GetRedisMemory, GetRedisKeys, AnalyseRdb,GetRedisTop500Prefix,GetPrefixkeys,GetRdbResultTitle } from "../../wailsjs/go/redis/Redis";
 const spinning = ref(false);
 const filename = ref("")
 const totalMomery = ref([])

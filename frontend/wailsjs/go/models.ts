@@ -1,27 +1,5 @@
-export namespace main {
+export namespace mysql {
 	
-	export class Connection {
-	    key: string;
-	    name: string;
-	    host: string;
-	    user: string;
-	    password: string;
-	    port: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new Connection(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.key = source["key"];
-	        this.name = source["name"];
-	        this.host = source["host"];
-	        this.user = source["user"];
-	        this.password = source["password"];
-	        this.port = source["port"];
-	    }
-	}
 	export class MysqlProcess {
 	    id: number;
 	    user: string;
@@ -98,20 +76,11 @@ export namespace main {
 		    return a;
 		}
 	}
-	export class Person {
-	    name: string;
-	    age: number;
+
+}
+
+export namespace redis {
 	
-	    static createFrom(source: any = {}) {
-	        return new Person(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.name = source["name"];
-	        this.age = source["age"];
-	    }
-	}
 	export class RedisKey {
 	    key: string;
 	    name: string;
@@ -156,6 +125,33 @@ export namespace main {
 	        this.countb3s7 = source["countb3s7"];
 	        this.momeryb7 = source["momeryb7"];
 	        this.countb7 = source["countb7"];
+	    }
+	}
+
+}
+
+export namespace utils {
+	
+	export class Connection {
+	    key: string;
+	    name: string;
+	    host: string;
+	    user: string;
+	    password: string;
+	    port: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Connection(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.key = source["key"];
+	        this.name = source["name"];
+	        this.host = source["host"];
+	        this.user = source["user"];
+	        this.password = source["password"];
+	        this.port = source["port"];
 	    }
 	}
 
