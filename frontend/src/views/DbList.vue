@@ -1,11 +1,11 @@
 <template>
-  <a-table bordered :data-source="data" :columns="columns" size="middle">
+  <a-table bordered :data-source="data" :columns="columns" size="small">
     <template #bodyCell="{ column, record }">
       <template v-if="column.dataIndex === 'name'">
         <a @click="onClick(record)">{{ record.name }}</a>
       </template>
       <template v-if="column.dataIndex === 'password'">
-        <a-input-password :value="record.password" disabled />
+        <a-input-password :value="record.password" disabled :bordered="false"/>
       </template>
     </template>
   </a-table>

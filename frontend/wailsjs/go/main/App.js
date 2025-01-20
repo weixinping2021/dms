@@ -10,14 +10,22 @@ export function DeleteCon(arg1) {
   return window['go']['main']['App']['DeleteCon'](arg1);
 }
 
-export function GetCons() {
-  return window['go']['main']['App']['GetCons']();
-}
-
 export function GetFullCons() {
   return window['go']['main']['App']['GetFullCons']();
 }
 
+export function GetWorkDir() {
+  return window['go']['main']['App']['GetWorkDir']();
+}
+
 export function OpenDialog() {
   return window['go']['main']['App']['OpenDialog']();
+}
+
+export function OpenDir() {
+  return window['go']['main']['App']['OpenDir']();
+}
+
+export function SetWorkDir(arg1) {
+  return window['go']['main']['App']['SetWorkDir'](arg1);
 }

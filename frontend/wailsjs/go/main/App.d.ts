@@ -6,8 +6,12 @@ export function AddCon(arg1:utils.Connection):Promise<string>;
 
 export function DeleteCon(arg1:utils.Connection):Promise<string>;
 
-export function GetCons():Promise<Array<{[key: string]: string}>>;
-
 export function GetFullCons():Promise<Array<utils.Connection>>;
 
+export function GetWorkDir():Promise<string>;
+
 export function OpenDialog():Promise<string>;
+
+export function OpenDir():Promise<string>;
+
+export function SetWorkDir(arg1:string):Promise<string>;

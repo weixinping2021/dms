@@ -9,6 +9,7 @@
                 </a-radio-group>
                 <a-button type="primary" @click="GetMysqlProcesslistFresh">刷新</a-button>
                 <a-button @click="Kill">杀死选中会话</a-button>
+                <a-divider type="vertical" />
                 <a-statistic title="总连接数" :value=total style="margin-right: 30px" />
                 <a-statistic title="活跃连接" :value=active style="margin-right: 30px" />
                 <a-statistic title="连接使用率" :precision="2" suffix="%" :value=active  total style="margin-right: 30px" />
