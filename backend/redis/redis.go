@@ -3,10 +3,13 @@ package redis
 import (
 	"bufio"
 	"context"
+	utils "dms/backend"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
+	"path"
 	"sort"
 	"strconv"
 	"strings"
@@ -70,7 +73,7 @@ func NewRedis() *Redis {
 
 func (a *Redis) AnalyseRdb(rdbFileName string) string {
 
-	rdbFile, err := os.Open(rdbFileName)
+	rdbFile, _ := os.Open(rdbFileName)
 	defer rdbFile.Close()
 
 	currentTime := time.Now()
@@ -78,19 +81,16 @@ func (a *Redis) AnalyseRdb(rdbFileName string) string {
 	// 自定义格式化: "2022-10-10:10:10:10"
 	formattedTime := currentTime.Format("2006-01-02:15:04:05")
 
-	csvKyes := fmt.Sprintf("./redis/%s_keys.csv", formattedTime)
+	redisPath := utils.GetReisdir()
 
-	csvFile, err := os.Create(csvKyes)
+	redisFileName := path.Join(redisPath, fmt.Sprintf("%s_keys.csv", formattedTime))
 
-	if err != nil {
-		fmt.Println("create json %s failed, %v", csvKyes, err)
-	}
-
+	csvFile, _ := os.Create(redisFileName)
 	defer csvFile.Close()
 
 	var dec = parser.NewDecoder(rdbFile)
 
-	_, err = csvFile.WriteString("database,key,type,size,size_readable,element_count,encoding,expiration,days\n")
+	_, err := csvFile.WriteString("database,key,type,size,size_readable,element_count,encoding,expiration,days\n")
 
 	csvWriter := csv.NewWriter(csvFile)
 
@@ -148,54 +148,55 @@ func (a *Redis) AnalyseRdb(rdbFileName string) string {
 		}
 		return true
 	})
-	fmt.Print(memory)
-	// 将结构体的格式，转为json字符串的格式。这里用的到库包是"github.com/pquerna/ffjson/ffjson"
 	data, err := json.Marshal(memory)
 	if err != nil {
 		fmt.Println(err)
 	}
 	// 将json格式的数据写入文件
-	err = os.WriteFile(fmt.Sprintf("./redis/%s_memory.csv", formattedTime), data, 0777)
+	redisMemoryFile := path.Join(redisPath, fmt.Sprintf("%s_memory.csv", formattedTime))
+	err = os.WriteFile(redisMemoryFile, data, 0777)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 	return formattedTime
 }
 
 func (a *Redis) GetRedisMemory(formattedTime string) RedisMomery {
 	// 打开 JSON 文件
-	file, err := os.Open(fmt.Sprintf("./redis/%s_memory.csv", formattedTime))
-	if err != nil {
-		fmt.Println("无法打开文件:", err)
-	}
+
+	redisPath := utils.GetReisdir()
+
+	redisFileName := path.Join(redisPath, fmt.Sprintf("%s_memory.csv", formattedTime))
+
+	file, _ := os.Open(redisFileName)
 	defer file.Close()
 
 	// 创建解码器并解析 JSON 文件
 	var memory RedisMomery
 	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&memory)
+	err := decoder.Decode(&memory)
+
 	if err != nil {
-		fmt.Println("JSON 解析错误:", err)
+		log.Println("JSON 解析错误:", err)
 	}
+
 	return memory
 }
 
 func (a *Redis) GetRedisKeys(filed string, formattedTime string) []RedisKey {
 
-	file, err := os.Open(fmt.Sprintf("./redis/%s_keys.csv", formattedTime))
-	if err != nil {
-		fmt.Println("无法打开文件:", err)
-	}
+	redisPath := utils.GetReisdir()
+
+	redisFileName := path.Join(redisPath, fmt.Sprintf("%s_keys.csv", formattedTime))
+
+	file, _ := os.Open(redisFileName)
 	defer file.Close()
 
 	// 创建 CSV 读取器
 	reader := csv.NewReader(file)
 
 	// 读取表头
-	headers, err := reader.Read()
-	if err != nil {
-		fmt.Println("读取表头失败:", err)
-	}
+	headers, _ := reader.Read()
 
 	// 确定需要排序的字段（假设字段为 "score"）
 	sortField := filed
@@ -209,7 +210,7 @@ func (a *Redis) GetRedisKeys(filed string, formattedTime string) []RedisKey {
 	}
 
 	if sortFieldIndex == -1 {
-		fmt.Printf("字段 %s 未找到\n", sortField)
+		log.Printf("字段 %s 未找到\n", sortField)
 	}
 
 	// 定义用于存储排序数据的切片
@@ -223,11 +224,12 @@ func (a *Redis) GetRedisKeys(filed string, formattedTime string) []RedisKey {
 			if err.Error() == "EOF" {
 				break
 			}
-			fmt.Println("读取行失败:", err)
+			log.Println("读取行失败:", err)
 		}
 
 		// 将指定字段转换为数值
 		sortValue, err := strconv.ParseFloat(row[sortFieldIndex], 64)
+
 		if err != nil {
 			// 如果转换失败，设为默认值 0
 			sortValue = 0
@@ -244,9 +246,6 @@ func (a *Redis) GetRedisKeys(filed string, formattedTime string) []RedisKey {
 	sort.Slice(records, func(i, j int) bool {
 		return records[i].SortBy > records[j].SortBy
 	})
-
-	// 输出表头
-	fmt.Println(headers)
 
 	// 输出前 500 行
 	limit := 500
@@ -269,11 +268,12 @@ func (a *Redis) GetRedisKeys(filed string, formattedTime string) []RedisKey {
 }
 
 func (a *Redis) GetPrefixkeys(prefix string, formattedTime string) []RedisKey {
+
+	redisPath := utils.GetReisdir()
+
+	redisFileName := path.Join(redisPath, fmt.Sprintf("%s_keys.csv", formattedTime))
 	// 打开 CSV 文件
-	file, err := os.Open(fmt.Sprintf("./redis/%s_keys.csv", formattedTime))
-	if err != nil {
-		fmt.Println("无法打开文件:", err)
-	}
+	file, _ := os.Open(redisFileName)
 	defer file.Close()
 
 	// 创建 CSV 读取器
@@ -363,7 +363,11 @@ func (a *Redis) GetPrefixkeys(prefix string, formattedTime string) []RedisKey {
 
 func (a *Redis) GetRedisTop500Prefix(formattedTime string) []RedisKey {
 
-	file, err := os.Open(fmt.Sprintf("./redis/%s_keys.csv", formattedTime))
+	redisPath := utils.GetReisdir()
+
+	redisFileName := path.Join(redisPath, fmt.Sprintf("%s_keys.csv", formattedTime))
+
+	file, err := os.Open(redisFileName)
 	if err != nil {
 		fmt.Println("Error opening file:", err)
 	}
@@ -448,8 +452,7 @@ func (a *Redis) GetRedisTop500Prefix(formattedTime string) []RedisKey {
 }
 
 func (a *Redis) GetRdbResultTitle() []map[string]string {
-	dir := "./redis" // 当前目录，你可以根据需要修改
-
+	dir := utils.GetReisdir()
 	// 读取目录下的文件
 	files, err := os.ReadDir(dir)
 	fmt.Println(len(files) / 2)

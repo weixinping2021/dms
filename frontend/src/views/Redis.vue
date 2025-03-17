@@ -8,26 +8,43 @@
                     </template>
                 </a-input>
                 <a-button @click="Analyse">开始分析</a-button>
-                <a-select
-                ref="select"
-                v-model:value="formattedTime"
-                style="width: 400px"
-                :options="rdbresult"
-                @focus="focus"
-                @change="handleChange"
-                ></a-select>
+                <a-select ref="select" v-model:value="formattedTime" style="width: 400px" :options="rdbresult"
+                    @focus="focus" @change="handleChange"></a-select>
             </a-flex>
         </a-spin>
     </a-row>
     <a-divider />
     <a-tabs v-model:activeKey="activeKey" type="card">
-        <a-tab-pane key="1" tab="内存占比图">
+        <a-tab-pane key="1" tab="过期时间统计数据">
             <a-card>
-                <a-card-grid style="width: 50%; text-align: center"><v-chart class="chart" :option="option"
-                        autoresize /></a-card-grid>
-                <a-card-grid style="width: 50%; text-align: center"><v-chart class="chart" :option="option1"
-                        autoresize /></a-card-grid>
+                <a-card-grid style="width: 50%; text-align: center"> <a-table :dataSource="dataMemorys"
+                        :columns="memoryCols">
+                        <template #summary>
+                            <a-table-summary-row>
+                                <a-table-summary-cell>总和</a-table-summary-cell>
+                                <a-table-summary-cell>
+                                    {{ totalMomery.momeryForever + totalMomery.momerys3 + totalMomery.momeryb3s7 + totalMomery.momeryb7 }}
+                                </a-table-summary-cell>
+                            </a-table-summary-row>
+                        </template>
+                    </a-table>
+                </a-card-grid>
+                <a-card-grid style="width: 50%; text-align: center">
+                    <a-table :dataSource="dataCounts"
+                        :columns="countsCols">
+                        <template #summary>
+                            <a-table-summary-row>
+                                <a-table-summary-cell>总和</a-table-summary-cell>
+                                <a-table-summary-cell>
+                                    {{ totalMomery.countForever + totalMomery.counts3 + totalMomery.countb3s7 + totalMomery.countb7 }}
+                                </a-table-summary-cell>
+                            </a-table-summary-row>
+                        </template>
+                    </a-table>
+                </a-card-grid>
             </a-card>
+
+
         </a-tab-pane>
         <a-tab-pane key="2" tab="Top 500 BigKey(按内存)">
             <a-table :columns="columns" :data-source="dataMemory"></a-table>
@@ -39,27 +56,18 @@
             <a-table :columns="columnPrefix" :data-source="dataPrefix"></a-table>
         </a-tab-pane>
         <a-tab-pane key="5" tab="Top 500 key前缀匹配查询(按内存)">
-            <a-input-search
-            v-model:value="prefix"
-            placeholder="input search text"
-            style="width: 200px"
-            @search="onSearch"
-            />
+            <a-input-search v-model:value="prefix" placeholder="input search text" style="width: 200px"
+                @search="onSearch" />
             <a-table :columns="columns" :data-source="dataPrefixSearch"></a-table>
         </a-tab-pane>
     </a-tabs>
 </template>
 
 <script setup>
-import { use } from 'echarts/core';
-import { CanvasRenderer } from 'echarts/renderers';
-import { PieChart } from 'echarts/charts';
-import { TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components';
-import VChart, { THEME_KEY } from 'vue-echarts';
-import { ref, provide } from 'vue';
+import { ref } from 'vue';
 import { FileAddOutlined } from '@ant-design/icons-vue';
-import { OpenDialog} from "../../wailsjs/go/main/App";
-import { GetRedisMemory, GetRedisKeys, AnalyseRdb,GetRedisTop500Prefix,GetPrefixkeys,GetRdbResultTitle } from "../../wailsjs/go/redis/Redis";
+import { OpenDialog } from "../../wailsjs/go/main/App";
+import { GetRedisMemory, GetRedisKeys, AnalyseRdb, GetRedisTop500Prefix, GetPrefixkeys, GetRdbResultTitle } from "../../wailsjs/go/redis/Redis";
 const spinning = ref(false);
 const filename = ref("")
 const totalMomery = ref([])
@@ -70,65 +78,8 @@ const dataPrefixSearch = ref([])
 const prefix = ref("")
 const formattedTime = ref("")
 const rdbresult = ref([])
-use([
-    CanvasRenderer,
-    PieChart,
-    TitleComponent,
-    TooltipComponent,
-    LegendComponent,
-]);
-
-provide(THEME_KEY, 'light');
-
-const option = ref({
-    title: {
-    text: '内存占用',
-    left: 'center',
-  },
-    tooltip: {
-        trigger: 'item',
-        formatter: '{a} <br/>{b} : {c} ({d}%)',
-    },
-    series: [
-        {
-            name: '内存占比',
-            type: 'pie',
-            data: [],
-            emphasis: {
-                itemStyle: {
-                    shadowBlur: 10,
-                    shadowOffsetX: 0,
-                    shadowColor: 'rgba(0, 0, 0, 0.5)',
-                },
-            },
-        },
-    ],
-})
-
-const option1 = ref({
-    title: {
-    text: 'key个数占用',
-    left: 'center',
-  },
-    tooltip: {
-        trigger: 'item',
-        formatter: '{a} <br/>{b} : {c} ({d}%)',
-    },
-    series: [
-        {
-            name: 'key个数占比',
-            type: 'pie',
-            data: [],
-            emphasis: {
-                itemStyle: {
-                    shadowBlur: 10,
-                    shadowOffsetX: 0,
-                    shadowColor: 'rgba(0, 0, 0, 0.5)',
-                },
-            },
-        },
-    ],
-})
+const dataMemorys = ref([])
+const dataCounts = ref([])
 
 
 const columns = [
@@ -151,6 +102,33 @@ const columns = [
     },
 ];
 
+const memoryCols = [
+    {
+        title: 'key分类',
+        dataIndex: 'keystype',
+        key: 'keystype',
+    },
+    {
+        title: '内存占用(bytes)',
+        dataIndex: 'memory',
+        key: 'memory',
+        sorter: (a, b) => a.memory - b.memory,
+    }
+]
+
+const countsCols = [
+    {
+        title: 'key分类',
+        dataIndex: 'keystype',
+        key: 'keystype',
+    },
+    {
+        title: '个数',
+        dataIndex: 'count',
+        key: 'count',
+        sorter: (a, b) => a.count - b.count,
+    }
+]
 const columnPrefix = [
     {
         title: 'Prefix',
@@ -185,28 +163,25 @@ function Analyse() {
         spinning.value = false;
         formattedTime.value = result
         GetRedisMemory(formattedTime.value).then((result) => {
-            console.log(result);
             totalMomery.value = result;
-            option.value.series[0].data = [
-                { value: result.momeryForever, name: '不过期' },
-                { value: result.momerys3, name: '3天内过期' },
-                { value: result.momeryb3s7, name: '3-7天内过期' },
-                { value: result.momeryb7, name: '>7天过期' },
-                // 添加或更新数据
+            dataMemorys.value = [
+                { key: '1', keystype: '不过期', memory: result.momeryForever },
+                { key: '2', keystype: '3天内过期', memory: result.momerys3 },
+                { key: '3', keystype: '3-7天内过期', memory: result.momeryb3s7 },
+                { key: '4', keystype: '>7天过期', memory: result.momeryb7 }
             ];
-            option1.value.series[0].data = [
-                { value: result.countForever, name: '不过期' },
-                { value: result.counts3, name: '3天内过期' },
-                { value: result.countb3s7, name: '3-7天内过期' },
-                { value: result.countb7, name: '>7天过期' },
-                // 添加或更新数据
+            dataCounts.value = [
+                { key: '1', keystype: '不过期', count: result.countForever },
+                { key: '2', keystype: '3天内过期', count: result.counts3 },
+                { key: '3', keystype: '3-7天内过期', count: result.countb3s7 },
+                { key: '4', keystype: '>7天过期', count: result.countb7 }
             ];
         });
-        GetRedisKeys("size",formattedTime.value).then((result) => {
+        GetRedisKeys("size", formattedTime.value).then((result) => {
             console.log(result);
             dataMemory.value = result;
         });
-        GetRedisKeys("days",formattedTime.value).then((result) => {
+        GetRedisKeys("days", formattedTime.value).then((result) => {
             console.log(result);
             dataExpire.value = result;
         });
@@ -217,56 +192,47 @@ function Analyse() {
     });
 
 }
-function onSearch(){
-    GetPrefixkeys(prefix.value,formattedTime.value).then((result) => {
-            console.log(result);
-            dataPrefixSearch.value = result;
-        });
+function onSearch() {
+    GetPrefixkeys(prefix.value, formattedTime.value).then((result) => {
+        console.log(result);
+        dataPrefixSearch.value = result;
+    });
 }
-function focus(){
+function focus() {
     GetRdbResultTitle().then((result) => {
-            console.log(result);
-            rdbresult.value = result;
-        });
+        console.log(result);
+        rdbresult.value = result;
+    });
 }
 
-function handleChange(){
+function handleChange() {
     GetRedisMemory(formattedTime.value).then((result) => {
-            console.log(result);
-            totalMomery.value = result;
-            option.value.series[0].data = [
-            { value: result.momeryForever, name: '不过期' },
-                { value: result.momerys3, name: '3天内过期' },
-                { value: result.momeryb3s7, name: '3-7天内过期' },
-                { value: result.momeryb7, name: '>7天过期' },
-                // 添加或更新数据
+        totalMomery.value = result;
+        dataMemorys.value = [
+            { key: '1', keystype: '不过期', memory: result.momeryForever },
+            { key: '2', keystype: '3天内过期', memory: result.momerys3 },
+            { key: '3', keystype: '3-7天内过期', memory: result.momeryb3s7 },
+            { key: '4', keystype: '>7天过期', memory: result.momeryb7 }
+        ];
+        dataCounts.value = [
+                { key: '1', keystype: '不过期', count: result.countForever },
+                { key: '2', keystype: '3天内过期', count: result.counts3 },
+                { key: '3', keystype: '3-7天内过期', count: result.countb3s7 },
+                { key: '4', keystype: '>7天过期', count: result.countb7 }
             ];
-            option1.value.series[0].data = [
-            { value: result.countForever, name: '不过期' },
-                { value: result.counts3, name: '3天内过期' },
-                { value: result.countb3s7, name: '3-7天内过期' },
-                { value: result.countb7, name: '>7天过期' },
-                // 添加或更新数据
-            ];
-        });
-        GetRedisKeys("size",formattedTime.value).then((result) => {
-            console.log(result);
-            dataMemory.value = result;
-        });
-        GetRedisKeys("days",formattedTime.value).then((result) => {
-            console.log(result);
-            dataExpire.value = result;
-        });
-        GetRedisTop500Prefix(formattedTime.value).then((result) => {
-            console.log(result);
-            dataPrefix.value = result;
-        });
+    });
+    GetRedisKeys("size", formattedTime.value).then((result) => {
+        console.log(result);
+        dataMemory.value = result;
+    });
+    GetRedisKeys("days", formattedTime.value).then((result) => {
+        console.log(result);
+        dataExpire.value = result;
+    });
+    GetRedisTop500Prefix(formattedTime.value).then((result) => {
+        console.log(result);
+        dataPrefix.value = result;
+    });
 }
 
 </script>
-
-<style scoped>
-.chart {
-    height: 50vh;
-}
-</style>

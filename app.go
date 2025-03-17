@@ -41,7 +41,12 @@ func (a *App) SetWorkDir(workdir string) string {
 			return err.Error()
 		}
 	}
+	//并且创建redis和cons两个目录
+
+	os.MkdirAll(path.Join(homeDir, "cons"), 0644)
+	os.MkdirAll(path.Join(homeDir, "redis"), 0644)
 	return "success"
+
 }
 
 func (a *App) GetWorkDir() (string, error) {

@@ -31,3 +31,8 @@ func GetCondir() string {
 	dir := GetWorkDir()
 	return filepath.Join(dir, "cons")
 }
+
+func GetReisdir() string {
+	dir := GetWorkDir()
+	return filepath.Join(dir, "redis")
+}
