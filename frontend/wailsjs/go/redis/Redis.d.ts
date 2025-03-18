@@ -4,12 +4,14 @@ import {redis} from '../models';
 
 export function AnalyseRdb(arg1:string):Promise<string>;
 
-export function GetPrefixkeys(arg1:string,arg2:string):Promise<Array<redis.RedisKey>>;
+export function GetExpireMemoryPic(arg1:string):Promise<Array<any>>;
+
+export function GetExpirePrefixs(arg1:string,arg2:string):Promise<Array<redis.RedisKey>>;
+
+export function GetForverMemoryPic(arg1:string):Promise<Array<any>>;
+
+export function GetPrefixDetail(arg1:string,arg2:string,arg3:string):Promise<Array<redis.RedisKey>>;
 
 export function GetRdbResultTitle():Promise<Array<{[key: string]: string}>>;
 
-export function GetRedisKeys(arg1:string,arg2:string):Promise<Array<redis.RedisKey>>;
-
-export function GetRedisMemory(arg1:string):Promise<redis.RedisMomery>;
-
-export function GetRedisTop500Prefix(arg1:string):Promise<Array<redis.RedisKey>>;
+export function GetRedisMemory(arg1:string):Promise<Array<{[key: string]: string}>>;

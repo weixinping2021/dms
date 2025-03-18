@@ -6,22 +6,26 @@ export function AnalyseRdb(arg1) {
   return window['go']['redis']['Redis']['AnalyseRdb'](arg1);
 }
 
-export function GetPrefixkeys(arg1, arg2) {
-  return window['go']['redis']['Redis']['GetPrefixkeys'](arg1, arg2);
+export function GetExpireMemoryPic(arg1) {
+  return window['go']['redis']['Redis']['GetExpireMemoryPic'](arg1);
+}
+
+export function GetExpirePrefixs(arg1, arg2) {
+  return window['go']['redis']['Redis']['GetExpirePrefixs'](arg1, arg2);
+}
+
+export function GetForverMemoryPic(arg1) {
+  return window['go']['redis']['Redis']['GetForverMemoryPic'](arg1);
+}
+
+export function GetPrefixDetail(arg1, arg2, arg3) {
+  return window['go']['redis']['Redis']['GetPrefixDetail'](arg1, arg2, arg3);
 }
 
 export function GetRdbResultTitle() {
   return window['go']['redis']['Redis']['GetRdbResultTitle']();
 }
 
-export function GetRedisKeys(arg1, arg2) {
-  return window['go']['redis']['Redis']['GetRedisKeys'](arg1, arg2);
-}
-
 export function GetRedisMemory(arg1) {
   return window['go']['redis']['Redis']['GetRedisMemory'](arg1);
-}
-
-export function GetRedisTop500Prefix(arg1) {
-  return window['go']['redis']['Redis']['GetRedisTop500Prefix'](arg1);
 }

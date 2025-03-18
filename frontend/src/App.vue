@@ -95,6 +95,9 @@ function handleOk() {
 </script>
 
 <style scoped>
+::v-deep .ant-layout-content {
+  background: #ffffff; /* 设置为白色或其他颜色 */
+}
 .sider .logo {
     padding: 16px;
     font-size: 18px;
@@ -120,6 +123,6 @@ function handleOk() {
 }
 
 .sider {
-    border-right: 1px solid #e8e8e8;
+    border-right: 1px solid #ffffff;
 }
 </style>

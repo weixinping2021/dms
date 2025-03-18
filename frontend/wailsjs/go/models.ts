@@ -83,10 +83,12 @@ export namespace redis {
 	
 	export class RedisKey {
 	    key: string;
-	    name: string;
 	    type: string;
 	    expire: string;
-	    size: string;
+	    sizereadable: string;
+	    size: number;
+	    elementcount: string;
+	    db: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new RedisKey(source);
@@ -95,36 +97,12 @@ export namespace redis {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.key = source["key"];
-	        this.name = source["name"];
 	        this.type = source["type"];
 	        this.expire = source["expire"];
+	        this.sizereadable = source["sizereadable"];
 	        this.size = source["size"];
-	    }
-	}
-	export class RedisMomery {
-	    momeryForever: number;
-	    countForever: number;
-	    momerys3: number;
-	    counts3: number;
-	    momeryb3s7: number;
-	    countb3s7: number;
-	    momeryb7: number;
-	    countb7: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new RedisMomery(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.momeryForever = source["momeryForever"];
-	        this.countForever = source["countForever"];
-	        this.momerys3 = source["momerys3"];
-	        this.counts3 = source["counts3"];
-	        this.momeryb3s7 = source["momeryb3s7"];
-	        this.countb3s7 = source["countb3s7"];
-	        this.momeryb7 = source["momeryb7"];
-	        this.countb7 = source["countb7"];
+	        this.elementcount = source["elementcount"];
+	        this.db = source["db"];
 	    }
 	}
 
